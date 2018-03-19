@@ -3,7 +3,8 @@
 \usepackage[margin=2cm]{geometry}
 \usepackage{amsmath,amsthm,amssymb,latexsym}
 \usepackage{graphicx}
-\usepackage{backref}
+%\usepackage{backref}
+%\usepackage{showkeys}
 %\usepackage[v2,tips,curve]{xy}
 
 \theoremstyle{plain}
@@ -40,8 +41,8 @@ Conclusions???
 
 \section{Introduction}
 
-We are interested in spatial ``predictive policing'' algorithms, \cite{rand}
-[\footnote{Add some more general references}]
+We are interested in spatial ``predictive policing'' algorithms (see
+\cite{rand} for an overview, or \cite{arc,bjp,ctu,jbmbp,levine,sepp,rdbjc})
 and in particular,
 how to assess the match between ``prediction'' and reality.  As \cite[Summary]{rand}
 argues, the word ``forecasting'' is better suited to the objective, reproducible, and
@@ -145,10 +146,8 @@ factors beyond simply the prediction algorithm in use.
 This paper grew out of our work to provide an open source implementation of
 different crime prediction methods, in the Python programming language.
 The prediction algorithms used later in the paper, and all of the comparison
-methods discussed in this paper, are implemented in the \texttt{open\_cp} package,
-available at \texttt{https://github.com/QuantCrimAtLeeds/PredictCode}.
-[\footnote{When finished, we should \emph{release} a fixed version, and also
-put the notebooks etc. in a different github repo.}]
+methods discussed in this paper, are implemented in the \texttt{open\_cp} package
+\cite{opencp}.
 
 
 
@@ -164,7 +163,7 @@ Patrol Plans''.
 
 We are in an unusual situation, compared to many spatial data studies: our ``predictions''
 are deliberately considered as being atheoretical, not based upon any one given statistical
-model; the ``reality'' we wish to compare to forms a sparse, stochastic point pattern.
+model, and the ``reality'' we wish to compare to forms a sparse, stochastic point pattern.
 That is, we are trying to predict where a small number of random events will occur, where
 the probability of such events is rather small.
 
@@ -251,13 +250,13 @@ of reality, it does seem to be the model underlying all predictions.
 Nevertheless, we will consider ``multi-scale'' techniques below,
 which attempt to capture dependence between spatial regions.
 
-[\footnote{Write a little summary box here, fixing notation.}]
-
 
 
 
 
 \section{The assessment methods}
+
+In this section we describe the assessment techniques we shall study.
 
 \subsection{Hit rate}\label{sec:hit_rate_intro}
 
@@ -269,8 +268,7 @@ common technique in the literature, \cite{bjp}, \cite[page~20]{jbmbp},
 \cite[Section~3.1]{arc}, \cite[Section~5]{sepp}.  Clearly the hit rate will increase
 monotonically with the coverage level.  As such, it is important to standardise the coverage
 level to, say, either select by \emph{area} covered, or to scale the hit rate by area covered
-(leading to the ``predictive accuracy index'', see \cite{ctu}).  As we shall only consider
-a fixed study area, we shall continue to the coverage level and hit rate directly.
+(leading to the ``predictive accuracy index'', see \cite{ctu}).
 
 The hit rate has an obvious interpretation, is easy to explain to an end user of the
 algorithm, and seems to directly capture what we care about most-- namely, finding the areas
@@ -300,7 +298,7 @@ which have value at most $p_k$; so $p'_k=1$ when $k$ is the ``most risky cell''.
 
 Given actual events $(x_i)_{i=1}^N$ we consider the values $(a_i)_{i=1}^N
 \subseteq (0,1]$ given by $a_i = p'_k$ for the $k$ such that $x_i$ is in cell $C_k$.
-The authors then work directly with values $(a_i)$.  For example,
+The authors then work directly with the values $(a_i)$.  For example,
 \begin{itemize}
 \item Compute a summary statistic, such as the mean $\frac{1}{N} \sum_{i=1}^N a_i$;
 \item Given two predictions $(p^{(1)}_k)$ and $(p^{(2)}_k)$, we form $(a^{(1)}_i)$ and 
@@ -313,7 +311,7 @@ common mean and variance, of a large enough sample size?
 
 An advantage of this method is that it explicitly recognises that the prediction method may
 not assign a consistent probability to each grid cell, but rather may just give a relative
-estimate of how risky one grid cell is, compared to another.  This method is related to the
+estimate of how risky one grid cell is compared to another.  This method is related to the
 hit rate method, but has the advantage of not requiring the specification of a ``coverage''.
 
 Notice that the rank ordering ``rounds up'': if there are two (or more) grid cells with
@@ -324,7 +322,7 @@ For this paper, we will always add a very small amount of noise to our predictio
 that each $p_k$ is unique, while also making sure that we do not alter the ranking, except
 to break ties.  (This is not always possible, due to finite floating point precision, but in
 practise seems to work well enough; see the discussion in Section~\ref{sec:ChicagoData}.)
-
+[\footnote{Check we do discuss this!}]
 
 
 \subsection{Likelihood}
@@ -335,7 +333,7 @@ for models, \cite{rdbjc} or \cite[Section~5]{sepp} where the authors write
 
 We compute the normalised log likelihood, as
 \[ L = \frac{1}{N} \sum_{i=1}^N \log p_{k_i} \]
-where again, $k_i$ is the cell containing $x_i$, namely $x_i \in C_{k_i}$ for each $i$.
+where again, $k_i$ is the cell containing $x_i$, namely $x_i \in C_{k_i}$, for each $i$.
 
 Assuming our inhomogeneous Poission model, conditioned on $N$, the likelihood of seeing
 $(x_i)_{i=1}^N$ is exactly $\prod_{i=1}^N f(x_i)$ which is approximated by
@@ -384,13 +382,13 @@ a 40\% chance of rain in Leeds''.  This carries two key pieces of information:
 \begin{itemize}
 \item The ``reliability'' of the forecast.  Over a long run of such ``40\% chance of rain''
 predictions, it should indeed rain around 4 in 10 times the next day.
-\item The ``resolution'' of the forecast.  Suppose in Leeds that is actually rains around
+\item The ``resolution'' of the forecast.  Suppose in Leeds that it actually rains around
 4 in 10 days each year.  Then a constant prediction of 40\% chance of rain would be reliable,
 but useless as a forecast.  The resolution of a forecast measures the ability of a forecast
 to separate cases which are more or less likely than the long term average.
 \end{itemize}
 
-To adapt this framework to our idea carries seems difficult.  Even assuming independence
+To adapt this framework to our setting seems difficult.  Even assuming independence
 of each grid location (which is seemingly assumed in e.g. \cite[Section~7.3.1]{js}) our
 forecasts are not ``probability forecasts'' in this sense, as our forecasts give no indication
 of the overall rate of crime (a perfectly reliable forecast, in the above sense, carries
@@ -592,15 +590,15 @@ in the next day (or other time period).  In this model, we obtain two counts, th
 of events which occurred in cell $H$, say $n_H$, and the count in $T$, say $n_T$.
 Set $N = n_H + n_T$.
 
-As a thought experiment, we perform some computational experiments.  We
-fix a real probability $p_{\text{r}}$ and $n>0$.  For each trial, we simulate
-$N$ as a Poisson random variable with mean $n$, and then simulate $n_H$ (with
-$n_T = N-n_H$) as a Binomial random variable $\operatorname{Bin}(n, p_{\text{r}})$.
+As a thought experiment (and often via computational experiments) we consider the following.
+We fix a real probability $p_{\text{r}}$ and $\lambda>0$.  For each trial, we simulate
+$N$ as a Poisson random variable with mean $\lambda$, and then simulate $n_H$ (with
+$n_T = N-n_H$) as a Binomial random variable $\operatorname{Bin}(N, p_{\text{r}})$.
 For each trial, we see how the proposed assessment method scores a prediction
-with value $p$.  We hence have three variables, $n, p, p_{\text{r}}$, and we
+with value $p$.  We hence have three variables, $\lambda, p, p_{\text{r}}$, and we
 wish to see how the methods capture $p$ being close to $p_{\text{r}}$ (or not)
-and what effect increasing $n$ (which should increase our confidence in assessing
-a prediction) changes the result.
+and what effect increasing $\lambda$ (which should increase our confidence in assessing
+a prediction) has on the result.
 
 
 \subsection{Hit rate}
@@ -623,7 +621,7 @@ case $p>1/2$.  The expected hit rate is
 &= p \sum_{N\geq 1} \mathbb P(N) = p(1-e^{-\lambda}).
 \end{align*}
 We limit to $N\geq 1$ as we cannot perform an evaluation with no events.  Thus
-for $n$ not too small, the expected hit rate is $p$.  Thus here the hit rate
+for $\lambda$ not too small, the expected hit rate is close to $p$.  Thus here the hit rate
 tells us about the \emph{underlying random process} but \emph{not the prediction}.
 
 The variance is harder to calculate analytically, see Figure~\ref{fig:hr1}.
@@ -746,10 +744,10 @@ no change in the overall shape of the result.
 
 For our Poisson model, a closed form does not exist.  The simulation study,
 Figure~\ref{fig:skill2}, gives results similar to the skill score.  Increasing $\lambda$
-here increases the value of the score, but if normalised, has the effect of both
-decreasing the variance, and of increasing the score when $p$ and $p_{\text{real}}$
-differ.  We will see shortly that the KL divergence score for the Dirichlet prior
-behaves in a similar way.
+here increases the value of the score, but if normalised, see Figure~\ref{fig:skill3},
+has the effect of both decreasing the variance, and of increasing the score when
+$p$ and $p_{\text{real}}$ differ.  We will see shortly that the KL divergence
+score for the Dirichlet prior behaves in a similar way.
 
 \begin{figure*}
   \includegraphics[width=\textwidth]{../details/brier_poisson_toy.pdf}
@@ -842,7 +840,7 @@ Figure~\ref{fig:1}.
 We will compare two models:
 \begin{enumerate}
 \item Complete spatial randomness, that is, a homogeneous Poisson process.  This is equivalent
-  to setting $p_k = 1/K$ for all $k$.  When making a prediction, we add each $p_k$ a uniformly
+  to setting $p_k = 1/K$ for all $k$.  When making a prediction, we add to each $p_k$ a uniformly
   random number between $0$ and $10^{-7}$, and then renormalise.  Some algorithms (e.g. selecting
   10\% coverage) do not cope well with many cells having exactly equal $p_k$ values.
 \item An inhomogeneous Poisson process.  We linearly scale the rectangle containing the grid
@@ -889,9 +887,13 @@ There are two things we wish to learn from an ``assessment method'':
 We can often reduce the question of comparing multiple algorithms to simply
 comparing their scores given by an assessment method.
 
-In the current experiment, notice that it is impossible to ``predict'' better than
-the generating model from which the data is actually drawn.  We have two graphical
-ways of comparing the results:
+In our experiment, we generate trial data from both models, and then make predictions
+from both models, leading to four experiments in total, for each prediction method.
+Notice that as we have complete control over the statistical process which leads to
+the trial data, it is impossible to ``predict'' better than the generating model from
+which the data is actually drawn.
+
+We have two graphical ways of comparing the results:
 \begin{itemize}
 \item A scatter plot.  For each trial, we compute the ``score'' from the assessment
   method for the two predictions, and plot these.  We also look at the marginal
@@ -901,18 +903,25 @@ ways of comparing the results:
   gives us confidence that looking at the score alone will tell us if the assessment
   is ``good''; a flat distribution suggests that we will have a harder time spotting
   outliers.
+  
+  For example, see Figure~\ref{fig:6}.  Here there are two scatter plots, one for each
+  generating model (the model from which samples of events are taken from).  For each
+  trial, we compute the score (in this example, the hit rate at 20\% coverage) for the
+  two predictions, and plot a point.
+
 \item The empirical ``cumulative density'' from the trials.  For each trial, we look at
   the difference between the scores from the assessment method, and then we compute the
   cumulative density from these.  For example, Figure~\ref{fig:5} shows that with
-  data from Model~1, around 20\% of the time, both predictions give the same
-  score.  That the density appears symmetric suggests (correctly, in this case)
-  that this assessment method does not discrimate well between the predictions.
+  events generated from Model~1, the solid line, around 20\% of the time,
+  both predictions give the same score.  That the density appears symmetric suggests
+  (correctly, in this case) that this assessment method does not discriminate well between
+  the predictions.
 \end{itemize}
 
 
 
 
-\subsection{Hit rate}
+\subsection{Hit rate}\label{sec:hit_rate_art}
 
 It is usual (compare \cite{arc, rdbjc, sepp}) to present a graph of coverage level
 against hit rate, or if predictions are made for many (say) days, to report the mean hit
@@ -956,7 +965,7 @@ the same shape, with model~2 increasingly outperforming model~1 at predicting da
 
 \begin{figure*}
   \includegraphics[width=\textwidth]{../details/hitrate2.pdf}
-  \caption{Hit rate for 20\% coverage.}
+  \caption{Hit rate for 20\% coverage.  See Section~\ref{sec:hit_rate_art}.}
    \label{fig:5}
 \end{figure*}
 
@@ -1026,10 +1035,10 @@ is unexpected.
    \label{fig:12}
 \end{figure*}
 
-If we select a fixed bandwidth (remember that this applied to the kernel estimation
+If we select a fixed bandwidth (remember that this is applied to the kernel estimation
 from the data, which is on average only 10 points) then we see optimal distrimination
 at around a bandwidth of 300m (2 grid cells), Figure~\ref{fig:12a}.  Notice that the
-scatter plots show dispersed kernel estimations, with the points forming a rough
+scatter plots are dispersed, with the points forming a rough
 straight line.  Hence we expect that knowing just the score from one prediction to
 not be terribly useful for this assessment method.
 
@@ -1076,7 +1085,7 @@ straight Brier score, Figure~\ref{fig:10}.
 
 We originally introduced the Brier score in the context of a multi-scale measure.
 The scatter plots (not shown here) do not change qualitatively as cells are aggregated;
-the Brier score decreases in absolute terms, which the Skill score increases and becomes
+the Brier score decreases in absolute terms, while the Skill score increases and becomes
 more clustered.  Figure~\ref{fig:10a} shows the CDF plots at different aggregations levels
 (from 1 cell, so no aggregation, through to 35 cells; the study area is 39 cells high).
 Initially there is very little difference (the 1 cell aggregated plots are of course
@@ -1097,7 +1106,7 @@ in its ability to discriminate up to moderate aggregation levels.
 \subsection{Information theoretic}\label{sec:bay_synth}
 
 We compare both the Kullback-Leibler divergence for the Dirichlet prior and posterior
-distributions, and for the predictive distributions.  We will set $t = 4$, as this is about
+distributions, and for the predictive distributions.  We will set $t = 10$, as this is about
 the value of $\mathbb E(N)$, as above.  The Dirichlet prior, Figure~\ref{fig:11}, shows
 good discrimination between the models from the CDF plot.  However, the scatter plots
 show less separation than we might hope for.  The CDF plot for the predictive distributions,
@@ -1137,8 +1146,8 @@ distribution method having better separated scatter plots.
 \section{Case study using Chicago data}\label{sec:ChicagoData}
 
 We now turn our attention to real data and real prediction methods.
-As data, we shall use the publicly available dataset of crime event from Chicago.
-We look will look at Burglary events in the North Side, for the year 2016.  Figure~\ref{fig:c1}
+As data, we shall use the publicly available dataset of crime events from Chicago.
+We will look at Burglary events in the North Side, for the year 2016.  Figure~\ref{fig:c1}
 shows a plot of each location, and also a fixed bandwidth kernel density estimation (bandwidth
 of 300m) showing an estimate of the density of events.  For each day in 2016 there are between
 0 and 10 actual events which occur, with a mean of 3.3 events a day.
@@ -1149,9 +1158,9 @@ of 300m) showing an estimate of the density of events.  For each day in 2016 the
    \label{fig:c1}
 \end{figure*}
 
-For this case study, we compare two prediction methods, as implemented in \texttt{open\_cp}.
-For each day of September to December, inclusive,
-we make a prediction for that day, using data from January 2016 up to, but \emph{not} including,
+For this case study, we compare two prediction methods, as implemented in \texttt{open\_cp},
+\cite{opencp}.  For each day of September to December, inclusive,
+we make a prediction for that day, using data from January 2016 up to, but not including,
 that day, and then score the prediction using the events which actually occur on that day.
 
 Our ``baseline prediction'' is what we term the ``naive'' predictor.  We look at all the data
@@ -1159,7 +1168,8 @@ in the past, count the number of events which occurred in each grid cell, and th
 counts to produce a risk surface.  The alternative method we term the ``KDE'' method.  This is
 based upon the ``prospective'' ideas in \cite{bjp}, but instead of working with grid cells,
 we first generate a continuous risk surface (essentially using some sort of kernel density
-estimation method, with a time component) and then sample to a grid.  We shall see that
+estimation method, with a time component) and then sample to a grid.  This follows the
+grid based method outlined in \cite{rdbjc}, for example.  We shall see that
 neither method performs terribly well, but this gives us a good opportunity to highlight
 differences in the comparison methods.
 
@@ -1220,7 +1230,7 @@ than the ``naive'' prediction.
    \label{fig:c1_like}
 \end{figure*}
 
-We present only the results for the fixed bandwidth KDE method, figure~\ref{fig:c1_kde}.
+We present only the results for the fixed bandwidth KDE method, Figure~\ref{fig:c1_kde}.
 As the bandwidth ranges from 40m to 100m (i.e. less than the grid cell size) the scatter
 plots show increasing correlation, but the CDF plots do not change much in shape.  As a
 smaller score is ``better'', these favour the KDE method around 60\% of the time.
@@ -1256,24 +1266,24 @@ the naive prediction around 55\% of the time.
 
 The multi-scale Brier scores are perhaps more informative than for the synthetic
 data study, see Figure~\ref{fig:c1_brier_multi}.  Again, we plot only 5 aggregation
-levels, but the missing plots are all very similar.
+levels, but the omitted plots are all very similar.
 For the Brier score we have kept
 the aspect ratio constant; the way we interpret the plots is that for either prediction,
 the Brier score becomes much more clustered, while the relative difference between the
 two prediction methods increases.  Figure~\ref{fig:c1_brier_multi1} showing the CDF plots
-somewhat confirms this, though we the jump in quality of the naive prediction at aggregation
+somewhat confirms this.  Notice the jump in quality of the naive prediction at aggregation
 level 2 (this also holds for level 3).  This seems to be telling us something useful, and
 perhaps expected: if we ``blur'' or ``smooth'' out the naive prediction by aggregating
 over nearest neighours, then it improves, which isn't surprising, given that the naive
 prediction takes no account of possible spatial interaction (unlike the KDE prediction).
 
-At higher aggregation levels the naive method again seems to loose ground.  However, notice
+At higher aggregation levels the naive method again seems to lose ground.  However, notice
 that the $x$ axis scale becomes rather narrow (relative to the associated scatter plots).
-Hence the ``real'' gradient of the CDF plot is becomes large, indicating a great deal of
+Hence the ``real'' gradient of the CDF plot is becoming large, indicating a great deal of
 uncertainty as to whether there is really any difference between the two predictions.
 
 The Skill scores again increase as the aggregation level increases, as expected.
-The CDF plots do not change terrible much in how they discriminate between the two
+The CDF plots do not change terribly much in how they discriminate between the two
 predictions; but here the $x$ axis scales increase and then decrease again.  If plotted
 with the same scale, this would indicate that there was much more certainty at a middle
 aggregation level than at either end.
@@ -1307,8 +1317,9 @@ more dispersed.
    \label{fig:c1_brier_multi2}
 \end{figure*}
 
-We recall that a smaller Kullback-Leibler divergence means a ``better'' match between
-prediction and observed data.  Thus, that we see most of the mass on the positive side
+Turning now to the information theoretic ideas,
+we recall that a smaller Kullback-Leibler divergence means a ``better'' match between
+prediction and observed data.  Thus that we see most of the mass on the positive side
 in Figure~\ref{fig:c1_bayes} shows that the ``naive'' prediction has a larger divergence
 than the KDE prediction.  The results for the predictive distributions are rather similar.
 
@@ -1342,8 +1353,8 @@ Bayesian approach which, under some assumptions, tries to capture the actual
 probability that two sequences $(x_i)$ and $(y_i)$ have different mean.  We will
 firstly attack the problem of comparing two hit-rate sequences.  The hit rate
 actually comes from scoring a number of trials, each trial having $n_i$ events of
-which we capture $x^{(1)}_i$ and $x^{(2)}_i$ from our two prediction algorithms
-(which could actually be a single algorithm, or many algorithms).  Let us model
+which we capture $x^{(1)}_i$ and $x^{(2)}_i$ from our two prediction algorithms.
+Let us model
 this by assuming that $x^{(l)}_i$ is distributed binomially with parameters $p_l$
 and $n_i$.  Here $p_l$ is assumed to depend only on the prediction algorithm, and
 not on $i$.  That is,
@@ -1364,7 +1375,7 @@ p_l^{\alpha_0+x_l-1} (1-p_l)^{\beta_0+N-x_l-1}. \]
 This has
 \[ \mathbb E(p_l) = \frac{\alpha_0+x_l}{\alpha_0+\beta_0+N}, \]
 which is close to the average $x_l / N$.  Note that this differs from
-the average hit rate, which is $\frac{1}{I} \sum_i x^{(l)}_i / n_i$.
+the average hit rate, which is $I^{-1} \sum_i x^{(l)}_i / n_i$.
 
 Given say $p_1, p_2$ we can compute for example $\mathbb P(p_1 > p_2)$.  Or we
 can find the inter-quartile range and graphically plot this.  
@@ -1556,7 +1567,7 @@ for spatial autocorrelation'',
 
 \bibitem{jbmbp} S.\,D. Johnson, D.\,J. Birks, L. McLaughlin, K.\,J. Bowers, K. Pease,
 	``Prospective crime mapping in operational context'', Home Office Online Report, 19/07.
-	Available at \texttt{http://library.college.police.uk/docs/hordsolr/rdsolr1907.pdf}
+	Available at \texttt{http://library.college.police.uk/docs/}\\\texttt{hordsolr/rdsolr1907.pdf}
 
 \bibitem{js} ``Forecast Verification.  A practitioner's guide in atmospheric science'',
     eds I.\,T. Jolliffe, D.\,B. Stephenson (Wiley, 2003).
@@ -1586,6 +1597,9 @@ for spatial autocorrelation'',
 \bibitem{rand} W.\,L. Perry, B. McInnis, C.\,C. Price, S.\,C. Smith, J.\,S. Hollywood,
         ``Predictive Policing. The Role of Crime Forecasting in Law Enforcement Operations'',
         (RAND Corporation 2013).
+
+\bibitem{opencp} Quantitative Criminology at Leeds, ``\texttt{open\_cp}'',
+   open source Python library, available at \texttt{https://github.com/QuantCrimAtLeeds/PredictCode}
 
 \bibitem{r} N. Roberts, ``Assessing the spatial and temporal variation in the skill of
 	precipitation forecasts from an NWP model'',
