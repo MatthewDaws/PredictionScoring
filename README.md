@@ -10,6 +10,11 @@ of synthetic data, and with a case-study using real data.
 - [article](article) : LaTeX source for the article
 - [details](details) : Python notebooks to perform the analysis and produce figures
 
+
+### Article
+
+See the [article](article/) directory for the LaTeX source-code, or [download a PDF file here](article.pdf).
+
 ### Requirements
 
 - Install [open_cp](https://github.com/QuantCrimAtLeeds/PredictCode)
